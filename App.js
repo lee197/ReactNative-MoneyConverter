@@ -17,36 +17,60 @@
   SafeAreaView,
   TextInput,
   Button,
-  Keyboard
+  Keyboard,
+  Alert
 } from 'react-native';
 
 import React, { Component } from 'react';
+
+const url = "http://data.fixer.io/api/latest"
+const networkingKey = "bd403a15fd9a00f7145648cfd77e0be3"
+const currencySymbol = "USD, JPY, GBP, AUD, CAD, CHF, CNY, SEK, NZD"
 
 export default class App extends Component<{}> {
 
   state = {
     eurMount: 1,
-    currency:[]
+    currency:[],
+    error:""
   }
 
   componentDidMount() {
-   this._requestData()
+   this._requestData(null)
 
  }
  _resetPress(){
-  this._requestData()
+  this._requestData(null)
 }
 
-_requestData(){
-  NativeModules.NetworkingManager.getOnlineData(value => {
-    this.setState({currency:[value["rates"]]})
-    console.log(this.state)
+_requestData(callback){
+  // could set as constant 
+  NativeModules.CurrencyNetworkingManager.setCurrencyConfig(url,networkingKey,currencySymbol)
+  NativeModules.CurrencyNetworkingManager.getCurrency(value => {
+
+    if (value["success"]){
+        this.setState({currency:[value["rates"]]})
+        console.log(this.state)
+        if (callback != null){
+          callback(true)
+        }
+    }else
+        console.log(this.state)      
+        this.setState({error:value["error"]})
+        if (callback != null){
+          callback(false)
+
+        } 
+      }
   })
 }
 
 
 _handlePress() {
 
+this._requestData(isSuccess => {
+
+if (isSuccess) {
  val = this.state.eurMount
  cur = this.state.currency[0]
 
@@ -81,9 +105,32 @@ _handlePress() {
  Keyboard.dismiss()
 }
 
+})
+ 
+}
 
 
 render() {
+
+if(this.state.error != ""){
+  // return error view
+ console.log(this.state.error)
+
+ Alert.alert(
+  'Connection Error',
+  this.state.error,
+  [
+    {
+      text: 'OK',
+      onPress: () => console.log('Cancel Pressed'),
+      style: 'cancel',
+    },
+  ],
+  {cancelable: false},
+);
+  return null
+}
+
 
  return (
   <SafeAreaView style={styles.container}>

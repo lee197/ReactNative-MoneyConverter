@@ -8,7 +8,8 @@
 
 #import <React/RCTBridgeModule.h>
 
-@interface RCT_EXTERN_MODULE(NetworkingManager, NSObject)
-   RCT_EXTERN_METHOD(getOnlineData:(RCTResponseSenderBlock)callback)
+@interface RCT_EXTERN_MODULE(CurrencyNetworkingManager, NSObject)
+   RCT_EXTERN_METHOD(setCurrencyConfig:(NSString *)urlString:(NSString *)keyString:(NSString *)symbolString)
+   RCT_EXTERN_METHOD(getCurrency:(RCTResponseSenderBlock)callback)
 @end
 
